@@ -3,7 +3,8 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:4000');
+const REACT_APP_SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:4000';
+const socket = io(REACT_APP_SERVER_URL);
 
 export default function MultiplayerChessboard() {
   const [game, setGame] = useState(new Chess());
