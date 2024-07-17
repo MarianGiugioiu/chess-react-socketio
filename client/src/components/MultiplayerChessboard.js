@@ -17,6 +17,7 @@ export default function MultiplayerChessboard() {
   const [selectedVoice, setSelectedVoice] = useState(null);
   const stockfishRef = useRef(null);
   const [currentBotMove, setCurrentBotMove] = useState('');
+  const [draggedPieceSquare, setDraggedPieceSquare] = useState(null);
 
   function getPieceName(pieceCode) {
     const pieceNames = {
@@ -41,6 +42,26 @@ export default function MultiplayerChessboard() {
     };
     return romanianPieceNames[pieceCode.toLowerCase()] || pieceCode;
   }
+
+  function getPossibleMoves(square) {
+    const moves = game.moves({ square: square, verbose: true });
+    return moves.map(move => move.to);
+  }
+
+  useEffect(() => {
+    if (draggedPieceSquare) {
+      const possibleMoves = getPossibleMoves(draggedPieceSquare);
+      const newStyles = {
+        [draggedPieceSquare]: { backgroundColor: 'rgba(255, 165, 0, 0.5)' }
+      };
+      possibleMoves.forEach(square => {
+        newStyles[square] = { backgroundColor: 'rgba(0, 255, 0, 0.4)' };
+      });
+      setCustomSquareStyles(newStyles);
+    } else {
+      setCustomSquareStyles({});
+    }
+  }, [draggedPieceSquare, game]);
 
   useEffect(() => {
     socket.on('gameState', (fen) => {
@@ -148,17 +169,15 @@ export default function MultiplayerChessboard() {
   }
 
   function onPieceDragBegin(piece, sourceSquare) {
-    setCustomSquareStyles({
-      [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
-    });
+    setDraggedPieceSquare(sourceSquare);
   }
 
   function onPieceDragEnd() {
-    setCustomSquareStyles({});
+    setDraggedPieceSquare(null);
   }
 
   function onDrop(sourceSquare, targetSquare, piece) {
-    if (game.turn() !== playerColor) return false;
+    if (game.turn() !== playerColor || status === 'Waiting for opponent to join...') return false;
 
     const move = {
       from: sourceSquare,
@@ -169,8 +188,9 @@ export default function MultiplayerChessboard() {
     try {
       const newGame = new Chess(game.fen());
       newGame.move(move);
-      generateBotMessage(cloneDeep(game));
+      generateBotMessage(cloneDeep(game), move);
       setGame(newGame);
+      setDraggedPieceSquare(null);
       updateGameStatus(newGame);
       updateCapturedPieces(newGame);
       socket.emit('move', { gameId, move });
@@ -181,10 +201,10 @@ export default function MultiplayerChessboard() {
     }
   }
 
-  function generateBotMessage(oldGame) {
+  function generateBotMessage(oldGame, playerMove) {
     const sourcePiece = oldGame.get(currentBotMove.slice(0, 2));
     const targetPiece = oldGame.get(currentBotMove.slice(2, 4));
-    if (targetPiece) {
+    if (targetPiece && (playerMove.from !== currentBotMove.slice(0, 2) || playerMove.to !== currentBotMove.slice(2, 4))) {
       const message = generateIronicMessage(sourcePiece.type, targetPiece.type);
       socket.emit('createBotMessage', { gameId, message });
     }
@@ -264,7 +284,7 @@ export default function MultiplayerChessboard() {
       {gameId && (
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '40px', marginBottom: '10px' }}>
               <p>Game ID: {gameId}</p>
               <p>{status}</p>
             </div>
@@ -276,7 +296,7 @@ export default function MultiplayerChessboard() {
                 onPieceDragEnd={onPieceDragEnd}
                 customSquareStyles={customSquareStyles}
                 boardOrientation={playerColor === 'b' ? 'black' : 'white'}
-                boardWidth={Math.min(800, window.innerWidth - 220)}
+                boardWidth={Math.min(800, window.innerHeight - 80)}
               />
               <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                 <div style={{ marginBottom: '20px' }}>
