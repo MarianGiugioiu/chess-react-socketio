@@ -4,7 +4,6 @@ import { Chess } from 'chess.js';
 
 export default function ChessboardComponent() {
   const [game, setGame] = useState(new Chess());
-  const [stockfish, setStockfish] = useState(null);
   const stockfishRef = useRef(null);
 
   // Bot settings
@@ -14,7 +13,6 @@ export default function ChessboardComponent() {
 
   useEffect(() => {
     const sf = new Worker(`${process.env.PUBLIC_URL}/stockfish.js`);
-    setStockfish(sf);
     stockfishRef.current = sf;
 
     sf.onmessage = (event) => {

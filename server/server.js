@@ -45,6 +45,10 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('createBotMessage', ({ gameId, message }) => {
+    io.to(gameId).emit('receiveBotMessage', message);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
