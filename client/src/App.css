@@ -1,7 +1,26 @@
 .App {
-  text-align: center;
+  position: relative;
 }
 
-.chessboard {
-  margin: auto;
+.canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.chessboard-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.background {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
 }

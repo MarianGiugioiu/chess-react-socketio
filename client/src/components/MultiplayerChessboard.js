@@ -283,8 +283,8 @@ export default function MultiplayerChessboard() {
       )}
       {gameId && (
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '40px', marginBottom: '10px' }}>
+          <div className='background' style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '40px', paddingBottom: '10px' }}>
               <p>Game ID: {gameId}</p>
               <p>{status}</p>
             </div>
@@ -298,7 +298,7 @@ export default function MultiplayerChessboard() {
                 boardOrientation={playerColor === 'b' ? 'black' : 'white'}
                 boardWidth={Math.min(800, window.innerHeight - 80)}
               />
-              <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
+              <div style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                 <div style={{ marginBottom: '20px' }}>
                   <h3>Captured by White:</h3>
                   <div>{capturedPieces.w.map(piece => getPieceName(piece)).join(', ')}</div>
